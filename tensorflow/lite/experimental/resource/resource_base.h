@@ -18,6 +18,7 @@ limitations under the License.
 #include <cstdint>
 #include <memory>
 #include <unordered_map>
+#include <map>
 
 namespace tflite {
 namespace resource {
@@ -35,7 +36,7 @@ class ResourceBase {
 
 /// WARNING: Experimental interface, subject to change.
 using ResourceMap =
-    std::unordered_map<std::int32_t, std::unique_ptr<ResourceBase>>;
+    std::map<std::int32_t, std::unique_ptr<ResourceBase>>;
 
 }  // namespace resource
 }  // namespace tflite

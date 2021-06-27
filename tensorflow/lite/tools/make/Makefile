@@ -340,7 +340,7 @@ $(OBJDIR)%.o: %.c
 	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
 # The target that's compiled if there's no command-line arguments.
-all: $(LIB_PATH)  $(MINIMAL_BINARY) $(BENCHMARK_BINARY) $(BENCHMARK_PERF_OPTIONS_BINARY)
+all: $(LIB_PATH)  $(MINIMAL_BINARY) $(BENCHMARK_BINARY) $(BENCHMARK_PERF_OPTIONS_BINARY) $(LABEL_IMAGE_BINARY)
 
 # The target that's compiled for micro-controllers
 micro: $(LIB_PATH)
@@ -350,20 +350,21 @@ tensorflow/lite/schema/schema_generated.h:
 	@cp -u tensorflow/lite/schema/schema_generated.h.oss tensorflow/lite/schema/schema_generated.h
 	@cp -u tensorflow/lite/experimental/acceleration/configuration/configuration_generated.h.oss tensorflow/lite/experimental/acceleration/configuration/configuration_generated.h
 
+DEPENDENCE_PENGLAI := $(MAKEFILE_DIR)/dependence_penglai/*.o
 # Gathers together all the objects we've compiled into a single '.a' archive.
 $(LIB_PATH): tensorflow/lite/schema/schema_generated.h $(LIB_OBJS)
 	@mkdir -p $(dir $@)
-	$(AR) $(ARFLAGS) $(LIB_PATH) $(LIB_OBJS)
+	$(AR) $(ARFLAGS) $(LIB_PATH) $(LIB_OBJS) $(DEPENDENCE_PENGLAI)
 $(LIB_PATH): tensorflow/lite/experimental/acceleration/configuration/configuration_generated.h $(LIB_OBJS)
 	@mkdir -p $(dir $@)
-	$(AR) $(ARFLAGS) $(LIB_PATH) $(LIB_OBJS)
+	$(AR) $(ARFLAGS) $(LIB_PATH) $(LIB_OBJS) $(DEPENDENCE_PENGLAI)
 
 lib: $(LIB_PATH)
 
 $(MINIMAL_BINARY): $(MINIMAL_OBJS) $(LIB_PATH)
 	@mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS) $(INCLUDES) \
-	-o $(MINIMAL_BINARY) $(MINIMAL_OBJS) \
+	-static -o $(MINIMAL_BINARY) $(MINIMAL_OBJS) \
 	$(LIBFLAGS) $(LIB_PATH) $(LDFLAGS) $(LIBS)
 
 minimal: $(MINIMAL_BINARY)
@@ -371,14 +372,14 @@ minimal: $(MINIMAL_BINARY)
 $(LABEL_IMAGE_BINARY): $(LABEL_IMAGE_OBJS) $(LIB_PATH)
 	@mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS) $(INCLUDES) \
-	-o $(LABEL_IMAGE_BINARY) $(LABEL_IMAGE_OBJS) \
+	-static -o $(LABEL_IMAGE_BINARY) $(LABEL_IMAGE_OBJS) \
 	$(LIBFLAGS) $(LIB_PATH) $(LDFLAGS) $(LIBS)
 
 label_image: $(LABEL_IMAGE_BINARY)
 
 $(BENCHMARK_LIB) : $(LIB_PATH) $(BENCHMARK_LIB_OBJS)
 	@mkdir -p $(dir $@)
-	$(AR) $(ARFLAGS) $(BENCHMARK_LIB) $(LIB_OBJS) $(BENCHMARK_LIB_OBJS)
+	$(AR) $(ARFLAGS) $(BENCHMARK_LIB) $(LIB_OBJS) $(BENCHMARK_LIB_OBJS) $(DEPENDENCE_PENGLAI)
 
 benchmark_lib: $(BENCHMARK_LIB)
 

@@ -69,6 +69,7 @@ class InterpreterBuilder {
   InterpreterBuilder(const InterpreterBuilder&) = delete;
   InterpreterBuilder& operator=(const InterpreterBuilder&) = delete;
 
+  TfLiteStatus AddInterpreter(std::unique_ptr<Interpreter>* interpreter);
   TfLiteStatus operator()(std::unique_ptr<Interpreter>* interpreter);
   TfLiteStatus operator()(std::unique_ptr<Interpreter>* interpreter,
                           int num_threads);

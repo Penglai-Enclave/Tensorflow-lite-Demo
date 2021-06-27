@@ -18,7 +18,7 @@ limitations under the License.
 #include <stddef.h>
 
 #include <string>
-#include <unordered_map>
+#include <map>
 #include <utility>
 
 #include "tensorflow/lite/c/common.h"
@@ -30,28 +30,28 @@ namespace tflite {
 
 // Some versions of gcc don't support partial specialization in class scope,
 // so these are defined in a namescope.
-namespace op_resolver_hasher {
-template <typename V>
-struct ValueHasher {
-  size_t operator()(const V& v) const { return std::hash<V>()(v); }
-};
+// namespace op_resolver_hasher {
+// template <typename V>
+// struct ValueHasher {
+//   size_t operator()(const V& v) const { return std::hash<V>()(v); }
+// };
 
-template <>
-struct ValueHasher<tflite::BuiltinOperator> {
-  size_t operator()(const tflite::BuiltinOperator& v) const {
-    return std::hash<int>()(static_cast<int>(v));
-  }
-};
+// template <>
+// struct ValueHasher<tflite::BuiltinOperator> {
+//   size_t operator()(const tflite::BuiltinOperator& v) const {
+//     return std::hash<int>()(static_cast<int>(v));
+//   }
+// };
 
-template <typename T>
-struct OperatorKeyHasher {
-  size_t operator()(const T& x) const {
-    size_t a = ValueHasher<typename T::first_type>()(x.first);
-    size_t b = ValueHasher<typename T::second_type>()(x.second);
-    return CombineHashes({a, b});
-  }
-};
-}  // namespace op_resolver_hasher
+// template <typename T>
+// struct OperatorKeyHasher {
+//   size_t operator()(const T& x) const {
+//     size_t a = ValueHasher<typename T::first_type>()(x.first);
+//     size_t b = ValueHasher<typename T::second_type>()(x.second);
+//     return CombineHashes({a, b});
+//   }
+// };
+// }  // namespace op_resolver_hasher
 
 // An OpResolver that is mutable, also used as the op in gen_op_registration.
 // A typical usage:
@@ -79,11 +79,9 @@ class MutableOpResolver : public OpResolver {
   typedef std::pair<tflite::BuiltinOperator, int> BuiltinOperatorKey;
   typedef std::pair<std::string, int> CustomOperatorKey;
 
-  std::unordered_map<BuiltinOperatorKey, TfLiteRegistration,
-                     op_resolver_hasher::OperatorKeyHasher<BuiltinOperatorKey> >
+  std::map<BuiltinOperatorKey, TfLiteRegistration>
       builtins_;
-  std::unordered_map<CustomOperatorKey, TfLiteRegistration,
-                     op_resolver_hasher::OperatorKeyHasher<CustomOperatorKey> >
+  std::map<CustomOperatorKey, TfLiteRegistration>
       custom_ops_;
 };
 

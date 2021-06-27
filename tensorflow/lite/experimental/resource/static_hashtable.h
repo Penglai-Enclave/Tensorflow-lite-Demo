@@ -16,7 +16,7 @@ limitations under the License.
 #define TENSORFLOW_LITE_EXPERIMENTAL_RESOURCE_STATIC_HASHTABLE_H_
 
 #include <unordered_map>
-
+#include <map>
 #include "tensorflow/lite/c/common.h"
 #include "tensorflow/lite/experimental/resource/lookup_interfaces.h"
 #include "tensorflow/lite/experimental/resource/lookup_util.h"
@@ -69,7 +69,7 @@ class StaticHashtable : public tflite::resource::LookupInterface {
   TfLiteType key_type_;
   TfLiteType value_type_;
 
-  std::unordered_map<KeyType, ValueType> map_;
+  std::map<KeyType, ValueType> map_;
   bool is_initialized_ = false;
 };
 

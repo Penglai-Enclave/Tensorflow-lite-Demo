@@ -22,25 +22,25 @@ limitations under the License.
 
 #include "tensorflow/lite/interpreter.h"
 #include "tensorflow/lite/schema/schema_generated.h"
-
+extern "C" void eapp_print(const char*s, ...);
 namespace tflite {
 
 void PrintIntVector(const std::vector<int>& v) {
   for (const auto& it : v) {
-    printf(" %d", it);
+    eapp_print(" %d", it);
   }
-  printf("\n");
+  eapp_print("\n");
 }
 
 void PrintTfLiteIntVector(const TfLiteIntArray* v) {
   if (!v) {
-    printf(" (null)\n");
+    eapp_print(" (null)\n");
     return;
   }
   for (int k = 0; k < v->size; k++) {
-    printf(" %d", v->data[k]);
+    eapp_print(" %d", v->data[k]);
   }
-  printf("\n");
+  eapp_print("\n");
 }
 
 const char* TensorTypeName(TfLiteType type) {
@@ -105,23 +105,23 @@ const char* AllocTypeName(TfLiteAllocationType type) {
 
 // Prints a dump of what tensors and what nodes are in the interpreter.
 void PrintInterpreterState(Interpreter* interpreter) {
-  printf("Interpreter has %zu tensors and %zu nodes\n",
+  eapp_print("Interpreter has %d tensors and %d nodes\n",
          interpreter->tensors_size(), interpreter->nodes_size());
-  printf("Inputs:");
+  eapp_print("Inputs:");
   PrintIntVector(interpreter->inputs());
-  printf("Outputs:");
+  eapp_print("Outputs:");
   PrintIntVector(interpreter->outputs());
-  printf("\n");
-  for (size_t tensor_index = 0; tensor_index < interpreter->tensors_size();
+  eapp_print("\n");
+  for (size_t tensor_index = 0; tensor_index < interpreter->tensors_size() - 1;
        tensor_index++) {
     TfLiteTensor* tensor = interpreter->tensor(static_cast<int>(tensor_index));
-    printf("Tensor %3zu %-20s %10s %15s %10zu bytes (%4.1f MB) ", tensor_index,
+    eapp_print("Tensor %d %s %s %s %d bytes (%d MB) ", tensor_index,
            tensor->name, TensorTypeName(tensor->type),
            AllocTypeName(tensor->allocation_type), tensor->bytes,
-           (static_cast<float>(tensor->bytes) / (1 << 20)));
+           (int)(static_cast<float>(tensor->bytes) / (1 << 20)));
     PrintTfLiteIntVector(tensor->dims);
   }
-  printf("\n");
+  eapp_print("\n");
   for (size_t node_index = 0; node_index < interpreter->nodes_size();
        node_index++) {
     const std::pair<TfLiteNode, TfLiteRegistration>* node_and_reg =
@@ -129,22 +129,22 @@ void PrintInterpreterState(Interpreter* interpreter) {
     const TfLiteNode& node = node_and_reg->first;
     const TfLiteRegistration& reg = node_and_reg->second;
     if (reg.custom_name != nullptr) {
-      printf("Node %3zu Operator Custom Name %s\n", node_index,
+      eapp_print("Node %d Operator Custom Name %s\n", node_index,
              reg.custom_name);
     } else {
-      printf("Node %3zu Operator Builtin Code %3d %s\n", node_index,
+      eapp_print("Node %d Operator Builtin Code %d %s\n", node_index,
              reg.builtin_code, EnumNamesBuiltinOperator()[reg.builtin_code]);
     }
-    printf("  Inputs:");
+    eapp_print("  Inputs:");
     PrintTfLiteIntVector(node.inputs);
-    printf("  Outputs:");
+    eapp_print("  Outputs:");
     PrintTfLiteIntVector(node.outputs);
     if (node.intermediates && node.intermediates->size) {
-      printf("  Intermediates:");
+      eapp_print("  Intermediates:");
       PrintTfLiteIntVector(node.intermediates);
     }
     if (node.temporaries && node.temporaries->size) {
-      printf("  Temporaries:");
+      eapp_print("  Temporaries:");
       PrintTfLiteIntVector(node.temporaries);
     }
   }

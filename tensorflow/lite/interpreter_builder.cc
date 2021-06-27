@@ -657,6 +657,124 @@ TfLiteStatus InterpreterBuilder::ApplyDelegates(Interpreter* interpreter,
   return kTfLiteOk;
 }
 
+TfLiteStatus InterpreterBuilder::AddInterpreter(
+    std::unique_ptr<Interpreter>* interpreter) {
+  if (!interpreter) {
+    error_reporter_->Report(
+            "Null output pointer passed to InterpreterBuilder.");
+    return kTfLiteError;
+  }
+
+  // Safe exit by deleting partially created interpreter, to reduce verbosity
+  // on error conditions. Use by return cleanup_on_error();
+  auto cleanup_and_error = [&interpreter]() {
+      interpreter->reset();
+      return kTfLiteError;
+  };
+
+  if (!model_) {
+    error_reporter_->Report("Null pointer passed in as model.");
+    return cleanup_and_error();
+  }
+
+  if (model_->version() != TFLITE_SCHEMA_VERSION) {
+    error_reporter_->Report(
+            "Model provided is schema version %d not equal "
+            "to supported version %d.\n",
+            model_->version(), TFLITE_SCHEMA_VERSION);
+    return cleanup_and_error();
+  }
+
+  if (BuildLocalIndexToRegistrationMapping() != kTfLiteOk) {
+    error_reporter_->Report("Registration failed.\n");
+    return cleanup_and_error();
+  }
+
+  // Flatbuffer model schemas define a list of opcodes independent of the graph.
+  // We first map those to registrations. This reduces string lookups for custom
+  // ops since we only do it once per custom op rather than once per custom op
+  // invocation in the model graph.
+  // Construct interpreter with correct number of tensors and operators.
+  auto* subgraphs = model_->subgraphs();
+  auto* buffers = model_->buffers();
+
+  if (subgraphs->size() == 0) {
+    TF_LITE_REPORT_ERROR(error_reporter_, "No subgraph in the model.\n");
+    return cleanup_and_error();
+  }
+
+  if (!buffers) {
+    TF_LITE_REPORT_ERROR(error_reporter_, "No buffers in the model.\n");
+    return cleanup_and_error();
+  }
+
+  interpreter->reset(new Interpreter(error_reporter_));
+  (*interpreter)->SetNumThreads(1);
+  if (subgraphs->size() > 1) {
+    (*interpreter)->AddSubgraphs(subgraphs->size() - 1);
+  }
+
+  (*interpreter)->SetProfiler(tflite::profiling::MaybeCreatePlatformProfiler());
+
+  for (int subgraph_index = 0; subgraph_index < subgraphs->size();
+       ++subgraph_index) {
+    const tflite::SubGraph* subgraph = (*subgraphs)[subgraph_index];
+    tflite::Subgraph* modified_subgraph =
+            (*interpreter)->subgraph(subgraph_index);
+    auto operators = subgraph->operators();
+    auto tensors = subgraph->tensors();
+    if (!operators || !tensors) {
+      TF_LITE_REPORT_ERROR(error_reporter_,
+                           "Did not get operators or tensors in subgraph %d.\n",
+                           subgraph_index);
+      return cleanup_and_error();
+    }
+    if (modified_subgraph->AddTensors(tensors->size()) != kTfLiteOk) {
+      return cleanup_and_error();
+    }
+    // Set num threads
+    // Parse inputs/outputs
+    modified_subgraph->SetInputs(
+            FlatBufferIntArrayToVector(subgraph->inputs()));
+    modified_subgraph->SetOutputs(
+            FlatBufferIntArrayToVector(subgraph->outputs()));
+    
+    // Finally setup nodes and tensors
+    if (ParseNodes(operators, modified_subgraph) != kTfLiteOk)
+      return cleanup_and_error();
+    if (ParseTensors(buffers, tensors, modified_subgraph) != kTfLiteOk)
+      return cleanup_and_error();
+      
+    std::vector<int> variables;
+    for (int i = 0; i < modified_subgraph->tensors_size(); ++i) {
+      auto* tensor = modified_subgraph->tensor(i);
+      if (tensor->is_variable) {
+        variables.push_back(i);
+      }
+    }
+    modified_subgraph->SetVariables(std::move(variables));
+    if (subgraph->name()) {
+      modified_subgraph->SetName(subgraph->name()->c_str());
+    }
+  }
+
+  if (ParseSignatureDefs(model_->signature_defs(), interpreter->get()) !=
+      kTfLiteOk) {
+    return cleanup_and_error();
+  }
+
+  if (num_fp32_tensors_ > 0) {
+    (*interpreter)->lazy_delegate_providers_ =
+            op_resolver_.GetDelegates(1);
+  }
+
+  TfLiteStatus status = ApplyDelegates(interpreter->get(), 1);
+  if (status != kTfLiteOk) {
+    interpreter->reset();
+  }
+  return status;
+}
+
 TfLiteStatus InterpreterBuilder::operator()(
     std::unique_ptr<Interpreter>* interpreter) {
   return operator()(interpreter, /*num_threads=*/-1);
