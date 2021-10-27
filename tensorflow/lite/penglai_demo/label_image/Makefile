@@ -42,7 +42,7 @@ GENDIR := $(MAKEFILE_DIR)/gen/linux_riscv64/
 LIBDIR := $(GENDIR)lib/
 LIB_NAME := libtensorflow-lite.a
 
-PENGLAI_SDK = ../../../../../Penglai-Enclave/sdk
+PENGLAI_SDK = ../../../../../Penglai-Enclave-sPMP/sdk
 SDK_LIB_DIR = $(PENGLAI_SDK)/lib
 MUSL_LIB_DIR = $(PENGLAI_SDK)/musl/lib
 
