@@ -350,7 +350,8 @@ tensorflow/lite/schema/schema_generated.h:
 	@cp -u tensorflow/lite/schema/schema_generated.h.oss tensorflow/lite/schema/schema_generated.h
 	@cp -u tensorflow/lite/experimental/acceleration/configuration/configuration_generated.h.oss tensorflow/lite/experimental/acceleration/configuration/configuration_generated.h
 
-DEPENDENCE_PENGLAI := $(MAKEFILE_DIR)/dependence_penglai/*.o
+PENGLAI_SDK = $(MAKEFILE_DIR)/../../../../../Penglai-Enclave-sPMP/sdk
+DEPENDENCE_PENGLAI := $(PENGLAI_SDK)/lib/app/src/*.o
 # Gathers together all the objects we've compiled into a single '.a' archive.
 $(LIB_PATH): tensorflow/lite/schema/schema_generated.h $(LIB_OBJS)
 	@mkdir -p $(dir $@)

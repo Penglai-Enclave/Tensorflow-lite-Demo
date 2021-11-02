@@ -65,17 +65,17 @@ LIBS := \
 APP=label_image
 APP_LDS ?= ../app.lds
 SDK_INCLUDE_DIR = $(SDK_LIB_DIR)/app/include
-LDFLAGS = -static -L$(SDK_LIB_DIR) -L$(MUSL_LIB_DIR) -L. -lpenglai-enclave-eapp -lc -lrt -lstdc++fs -lsupc++ -lstdc++ -lpthread -lm -ldl -latomic
+LDFLAGS = -static -L$(SDK_LIB_DIR) -L$(MUSL_LIB_DIR) -L./lib -lpenglai-enclave-eapp -lc -lrt -lstdc++fs -lsupc++ -lstdc++ -lpthread -lm -ldl -latomic
 
 SDK_APP_LIB = $(SDK_LIB_DIR)/libpenglai-enclave-eapp.a
 MUSL_LIBC = $(MUSL_LIB_DIR)/libc.a
 GCC_LIB = $(SDK_LIB_DIR)/libgcc.a
 
 all:
-	$(CXX) -c label_image.cc $(CXXFLAGS) $(INCLUDES) -g -static -o label_image.o
-	$(CC) -I$(SDK_INCLUDE_DIR) -c label_image_entry.c -g -o label_image_entry.o
-	$(CXX) -c stub.cc $(CXXFLAGS) -g -static -o stub.o
-	$(LINK) -L. -L$(SDK_LIB_DIR) -L$(MUSL_LIB_DIR) -g -static -o $(APP) label_image.o label_image_entry.o stub.o $(LIB_PATH) $(SDK_APP_LIB) $(MUSL_LIBC) $(GCC_LIB) $(LIBS) -T $(APP_LDS)
+	$(CXX) -c label_image.cc $(CXXFLAGS) $(INCLUDES) -static -o label_image.o
+	$(CC) -I$(SDK_INCLUDE_DIR) -c label_image_entry.c -o label_image_entry.o
+	$(CXX) -c stub.cc $(CXXFLAGS) -static -o stub.o
+	$(LINK) -L./lib -L$(SDK_LIB_DIR) -L$(MUSL_LIB_DIR) -static -o $(APP) label_image.o label_image_entry.o stub.o $(LIB_PATH) $(SDK_APP_LIB) $(MUSL_LIBC) $(GCC_LIB) $(LIBS) -T $(APP_LDS)
 	chmod -x $(APP)
 
 clean:

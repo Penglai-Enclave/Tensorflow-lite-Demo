@@ -21,18 +21,7 @@ Then, download the dependency files for tensorflow lite.
 
 Last, build the risc-v version of tensorflow lite.
 
-**Note**: You should make sure that there is a local riscv compilation chain so that you can use riscv64-unknown-linux-gnu-gcc and riscv64-unknown-linux-gnu-g++.
-
-    ./build_riscv_lib.sh
-
-You can also use penglai-sPMP docker image to build:
-
-    cd ../../../../../
-    docker run -v $(pwd):/home/penglai/penglai-enclave -w /home/penglai/penglai-enclave --rm -it ddnirvana/penglai-enclave:v0.5 tensorflow/tensorflow/lite/tools/make/build_riscv_lib.sh
-
-### Build label_image demo with Penglai supports
-
-**Note1**: Before you build label_image, you should make sure that Penglai has been built successfully.
+**Note1**: Before you build the risc-v version of tensorflow lite, you should make sure that Penglai has been built successfully.
 
 **Note2**: The *MAX_ORDER* used in Penglai should be at least 16, you can refer to [large-demo-supports-20211026.patch](https://github.com/Penglai-Enclave/Penglai-Enclave-sPMP/blob/opensbi/patches/large-demo-supports-20211026.patch) for changing the *MAX_ORDER* in *mmzone.h*.
 
@@ -42,7 +31,16 @@ You can also use penglai-sPMP docker image to build:
 
 to customize parameters CUSTOM_BRK_SIZE and CUSTOM_MMAP_SIZE. You can find more details in [musl.config.md](https://github.com/Penglai-Enclave/penglai-sdk/blob/master/docs/musl.config.md).
 
-Then, you can build label_image demo with Penglai supports:
+**Note4**: You should make sure that there is a local riscv compilation chain so that you can use riscv64-unknown-linux-gnu-gcc and riscv64-unknown-linux-gnu-g++.
+
+    ./build_riscv_lib.sh
+
+You can also use penglai-sPMP docker image to build:
+
+    cd ../../../../../
+    docker run -v $(pwd):/home/penglai/penglai-enclave -w /home/penglai/penglai-enclave --rm -it ddnirvana/penglai-enclave:v0.5 tensorflow/tensorflow/lite/tools/make/build_riscv_lib.sh
+
+### Build label_image demo with Penglai supports
 
     cd ../../penglai_demo/label_image
     make
