@@ -8,10 +8,10 @@ The penglai_demo directory contains tensorflow lite application that can be run 
 
 First, clone tensorflow, and place tensorflow and Penglai in the same level directory.
 
-**Note**: The Penglai project's name should be *Penglai-Enclave-sPMP*.
+**Note**: The Penglai project's name should be *Penglai-Enclave-sPMP* and the Tensorflow project's name should be *Tensorflow-lite-Demo*.
 
-    git clone https://github.com/Moonquakes/tensorflow.git
-    cd tensorflow
+    git clone https://github.com/Penglai-Enclave/Tensorflow-lite-Demo.git
+    cd Tensorflow-lite-Demo
     git checkout penglai
 
 Then, download the dependency files for tensorflow lite.
@@ -38,7 +38,7 @@ to customize parameters CUSTOM_BRK_SIZE and CUSTOM_MMAP_SIZE. You can find more 
 You can also use penglai-sPMP docker image to build:
 
     cd ../../../../../
-    docker run -v $(pwd):/home/penglai/penglai-enclave -w /home/penglai/penglai-enclave --rm -it ddnirvana/penglai-enclave:v0.5 tensorflow/tensorflow/lite/tools/make/build_riscv_lib.sh
+    docker run -v $(pwd):/home/penglai/penglai-enclave -w /home/penglai/penglai-enclave --rm -it ddnirvana/penglai-enclave:v0.5 Tensorflow-lite-Demo/tensorflow/lite/tools/make/build_riscv_lib.sh
 
 ### Build label_image demo with Penglai supports
 
@@ -47,7 +47,7 @@ You can also use penglai-sPMP docker image to build:
 
 You can also use penglai-sPMP docker image to build:
 
-    docker run -v $(pwd):/home/penglai/penglai-enclave -w /home/penglai/penglai-enclave --rm -it ddnirvana/penglai-enclave:v0.5 tensorflow/tensorflow/lite/penglai_demo/label_image/scripts/build_label_image.sh
+    docker run -v $(pwd):/home/penglai/penglai-enclave -w /home/penglai/penglai-enclave --rm -it ddnirvana/penglai-enclave:v0.5 Tensorflow-lite-Demo/tensorflow/lite/penglai_demo/label_image/scripts/build_label_image.sh
 
 ### Run label_image demo with Penglai supports
 You can copy label_image to openEuler Qemu using scp.

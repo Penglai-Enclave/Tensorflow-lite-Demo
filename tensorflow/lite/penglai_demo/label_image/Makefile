@@ -3,7 +3,7 @@ ifeq ($(origin MAKEFILE_DIR), undefined)
 	TEMP_MAKEFILE_DIR := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 endif
 
-MAKEFILE_DIR := $(TEMP_MAKEFILE_DIR)/../../../../../tensorflow/tensorflow/lite/tools/make
+MAKEFILE_DIR := $(TEMP_MAKEFILE_DIR)/../../../../../Tensorflow-lite-Demo/tensorflow/lite/tools/make
 INCLUDES := \
 -I. \
 -I$(MAKEFILE_DIR)/../../../../ \
