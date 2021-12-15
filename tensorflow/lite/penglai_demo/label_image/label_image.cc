@@ -47,8 +47,7 @@ int __main_label_image() {
   eapp_print("Construct InterpreterBuilder successfully\n");
   std::unique_ptr<tflite::Interpreter> interpreter;
   eapp_print("Construct Interpreter successfully\n");
-  builder.AddInterpreter(&interpreter);
-  // builder(&interpreter);
+  builder(&interpreter);
   eapp_print("AddInterpreter successfully\n");
   TFLITE_MINIMAL_CHECK(interpreter != nullptr);
   eapp_print("Check interpreter != nullptr successfully\n");
